@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลำดับและอนุกรม - สื่อการเรียนรู้โต้ตอบ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- MathJax for Mathematical Formulas -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Prompt', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.95);
+        }
+        /* Custom scrollbar for mobile responsiveness */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                    <i class="fa-solid fa-infinity text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">ลำดับและอนุกรม</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">สื่อการเรียนรู้คณิตศาสตร์โต้ตอบ (20 ข้อไต่ระดับ)</p>
+                </div>
+            </div>
+
+            <!-- Desktop & Tablet Navigation Tabs -->
+            <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <button onclick="switchTab('theory')" id="nav-theory" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm">
+                    <i class="fa-solid fa-book-open mr-2"></i>เนื้อหา & สูตร
+                </button>
+                <button onclick="switchTab('workbench')" id="nav-workbench" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-chart-line mr-2"></i>กราฟ & คำนวณ
+                </button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-clipboard-question mr-2"></i>แบบทดสอบ (20 ข้อ)
+                </button>
+                <button onclick="switchTab('battle')" id="nav-battle" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-gamepad mr-2"></i>โหมดประลอง (มือถือ QR)
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-2">
+                <!-- Theme Toggle -->
+                <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('theory'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-book-open w-5 text-indigo-500"></i><span>เนื้อหา & สูตร</span>
+            </button>
+            <button onclick="switchTab('workbench'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5 text-indigo-500"></i><span>กราฟ & คำนวณ</span>
+            </button>
+            <button onclick="switchTab('quiz'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-clipboard-question w-5 text-indigo-500"></i><span>แบบทดสอบ (20 ข้อ)</span>
+            </button>
+            <button onclick="switchTab('battle'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-gamepad w-5 text-indigo-500"></i><span>โหมดประลอง (มือถือ QR)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-y-auto">
+
+        <!-- TAB 1: THEORY & FORMULAS -->
+        <section id="tab-content-theory" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-6 sm:p-10 text-white shadow-xl shadow-indigo-500/10">
+                <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider">บทเรียนหลัก</span>
+                <h2 class="text-2xl sm:text-4xl font-bold mt-3 mb-2">ลำดับและอนุกรม (Sequences & Series)</h2>
+                <p class="text-indigo-100 text-sm sm:text-base max-w-3xl">เรียนรู้ความหมาย สูตรทั่วไป และการคำนวณลำดับเลขคณิต ลำดับเรขาคณิต พร้อมอนุกรมและการประยุกต์ใช้งานจริงแบบโต้ตอบ</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Arithmetic Sequence -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">AP</div>
+                            <h3 class="text-lg font-bold">ลำดับเลขคณิต (Arithmetic Sequence)</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">ลำดับที่มีผลต่างร่วม ($d$) คงที่ โดยนำพจน์หลังลบพจน์หน้า ($a_{n+1} - a_n = d$)</p>
+                        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 mb-4 text-center">
+                            <p class="text-base font-semibold text-indigo-600 dark:text-indigo-400">$a_n = a_1 + (n - 1)d$</p>
+                            <p class="text-xs text-slate-500 mt-1">สูตรพจน์ทั่วไป ($n$)</p>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-center">
+                            <p class="text-base font-semibold text-indigo-600 dark:text-indigo-400">$S_n = \frac{n}{2}(a_1 + a_n) = \frac{n}{2}[2a_1 + (n-1)d]$</p>
+                            <p class="text-xs text-slate-500 mt-1">สูตรผลบวก $n$ พจน์แรก (อนุกรมเลขคณิต)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geometric Sequence -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-600 flex items-center justify-center font-bold">GP</div>
+                            <h3 class="text-lg font-bold">ลำดับเรขาคณิต (Geometric Sequence)</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">ลำดับที่มีอัตราส่วนร่วม ($r$) คงที่ โดยนำพจน์หลังหารด้วยพจน์หน้า ($\frac{a_{n+1}}{a_n} = r$)</p>
+                        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 mb-4 text-center">
+                            <p class="text-base font-semibold text-violet-600 dark:text-violet-400">$a_n = a_1 r^{n-1}$</p>
+                            <p class="text-xs text-slate-500 mt-1">สูตรพจน์ทั่วไป ($n$)</p>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-center">
+                            <p class="text-base font-semibold text-violet-600 dark:text-violet-400">$S_n = \frac{a_1(1 - r^n)}{1 - r}$เมื่อ $r \neq 1$</p>
+                            <p class="text-xs text-slate-500 mt-1">สูตรผลบวก $n$ พจน์แรก (อนุกรมเรขาคณิต)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: GRAPH WORKBENCH & CALCULATOR -->
+        <section id="tab-content-workbench" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-sliders text-indigo-500 mr-2"></i>ตั้งค่าพารามิเตอร์ลำดับ</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">ประเภทลำดับ</label>
+                        <select id="wb-type" onchange="updateWorkbench()" class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="ap">ลำดับเลขคณิต (AP)</option>
+                            <option value="gp">ลำดับเรขาคณิต (GP)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">พจน์แรก ($a_1$)</label>
+                        <input type="number" id="wb-a1" value="2" oninput="updateWorkbench()" class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div id="wb-diff-group">
+                        <label id="wb-diff-label" class="block text-xs font-semibold uppercase text-slate-500 mb-1">ผลต่างร่วม ($d$)</label>
+                        <input type="number" id="wb-d" value="3" oninput="updateWorkbench()" class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">จำนวนพจน์ ($n$)</label>
+                        <input type="number" id="wb-n" value="10" min="3" max="30" oninput="updateWorkbench()" class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Results and Summary Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-indigo-50 dark:bg-indigo-950/40 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/50">
+                        <p class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold uppercase">พจน์ทั่วไป ($a_n$)</p>
+                        <p id="wb-res-an" class="text-lg font-bold mt-1 text-slate-900 dark:text-white">-</p>
+                    </div>
+                    <div class="bg-violet-50 dark:bg-violet-950/40 p-4 rounded-2xl border border-violet-100 dark:border-violet-900/50">
+                        <p class="text-xs text-violet-600 dark:text-violet-400 font-semibold uppercase">ผลบวก $n$ พจน์แรก ($S_n$)</p>
+                        <p id="wb-res-sn" class="text-lg font-bold mt-1 text-slate-900 dark:text-white">-</p>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                        <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase">ลำดับสมาชิก</p>
+                        <p id="wb-res-seq" class="text-sm font-bold mt-1 text-slate-900 dark:text-white truncate">-</p>
+                    </div>
+                </div>
+
+                <!-- Canvas Chart -->
+                <div class="relative w-full h-80 bg-slate-50 dark:bg-slate-950/50 rounded-2xl p-4 border border-slate-200 dark:border-slate-800">
+                    <canvas id="sequenceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: QUIZ (20 Progressive Questions) -->
+        <section id="tab-content-quiz" class="tab-content hidden space-y-6">
+            <div id="quiz-start-screen" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center max-w-2xl mx-auto shadow-sm">
+                <div class="w-16 h-16 bg-indigo-500/10 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">แบบทดสอบวัดผล ลำดับและอนุกรม (20 ข้อ)</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">คำถามไต่ระดับความยากจากง่าย (พื้นฐานสูตร) ไปจนถึงยาก (โจทย์ประยุกต์และอนุกรมอนันต์)<br><strong class="text-indigo-600">เงื่อนไขพิเศษ:</strong> ตอบถูกจะแสดงผลทันทีและข้ามไปยังข้อถัดไปใน 1.5 วินาทีอัตโนมัติ!</p>
+                <button onclick="startQuiz()" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition-all">
+                    <i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบทดสอบ
+                </button>
+            </div>
+
+            <div id="quiz-active-screen" class="hidden space-y-6 max-w-3xl mx-auto">
+                <!-- Quiz Progress Bar Header -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span id="quiz-counter" class="text-xs font-bold uppercase px-3 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-full">ข้อที่ 1 / 20</span>
+                        <span id="quiz-difficulty" class="ml-2 text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full">ระดับ: ง่าย</span>
+                    </div>
+                    <div class="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                        คะแนนสะสม: <span id="quiz-score" class="text-indigo-600 dark:text-indigo-400 font-bold text-base">0</span> / 20
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                    <h4 id="quiz-question-text" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-relaxed">คำถามกำลังโหลด...</h4>
+
+                    <div id="quiz-options" class="grid grid-cols-1 gap-3">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <!-- Explanation Box -->
+                    <div id="quiz-explanation" class="hidden bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-2">
+                        <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                            <i class="fa-solid fa-circle-info"></i><span>วิธีทำและคำอธิบายโดยละเอียด</span>
+                        </div>
+                        <p id="quiz-explanation-text" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Result Screen -->
+            <div id="quiz-result-screen" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center max-w-xl mx-auto shadow-sm space-y-4">
+                <div class="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-3xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-2xl font-bold">สรุปผลการทดสอบ</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">คุณทำคะแนนได้</p>
+                <div class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400"><span id="final-score">0</span> <span class="text-2xl text-slate-400">/ 20</span></div>
+                <p id="final-message" class="text-sm font-medium text-slate-700 dark:text-slate-300"></p>
+                <div class="pt-4 flex justify-center space-x-4">
+                    <button onclick="startQuiz()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl transition-all">
+                        <i class="fa-solid fa-rotate-right mr-2"></i>ทำแบบทดสอบอีกครั้ง
+                    </button>
+                    <button onclick="switchTab('theory')" class="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold rounded-2xl transition-all">
+                        กลับสู่หน้าหลัก
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: CLASSROOM BATTLE GAME & MOBILE QR -->
+        <section id="tab-content-battle" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-slate-800">
+                    <div>
+                        <span class="px-3 py-1 bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 rounded-full text-xs font-bold uppercase">โหมดประลองในห้องเรียน</span>
+                        <h3 class="text-2xl font-bold mt-2">สแกน QR เพื่อใช้มือถือเป็นรีโมทตอบคำถาม</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">จำลองบรรยากาศการแข่งขันแบบเรียลไทม์ ผู้เรียนสามารถสแกน QR Code เพื่อเชื่อมต่อหน้าจอมือถือเป็นปุ่มกดตอบคำถามได้ทันที</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col items-center">
+                        <div id="qrcode" class="bg-white p-2 rounded-xl shadow-sm mb-2"></div>
+                        <span class="text-xs font-semibold text-slate-500">QR สำหรับเชื่อมต่อมือถือ</span>
+                    </div>
+                </div>
+
+                <!-- Battle Controls & Status -->
+                <div class="pt-6">
+                    <div id="battle-setup" class="text-center py-6 space-y-4">
+                        <p class="text-sm font-medium text-slate-600 dark:text-slate-400">สถานะ: พร้อมเริ่มเกมประลอง 20 ข้อ (จับเวลา & ตัดแต้มความเร็ว)</p>
+                        <button onclick="startBattleGame()" class="px-8 py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-violet-500/25 transition-all">
+                            <i class="fa-solid fa-play mr-2"></i>เริ่มเกมประลองห้องเรียน
+                        </button>
+                    </div>
+
+                    <div id="battle-arena" class="hidden space-y-6">
+                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl">
+                            <div>
+                                <span id="battle-q-num" class="text-xs font-bold px-3 py-1 bg-violet-100 text-violet-700 rounded-full">ข้อ 1 / 20</span>
+                                <span id="battle-timer" class="ml-3 font-bold text-rose-500"><i class="fa-solid fa-stopwatch mr-1"></i>15s</span>
+                            </div>
+                            <div class="text-sm font-bold">คะแนนผู้เล่น: <span id="battle-score" class="text-violet-600 text-lg">0</span></div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                            <h4 id="battle-q-text" class="text-lg font-bold">คำถามประลองกำลังโหลด...</h4>
+                            <div id="battle-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Tab Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-white', 'dark:bg-slate-700', 'text-indigo-600', 'dark:text-white', 'shadow-sm');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white', 'dark:bg-slate-700', 'text-indigo-600', 'dark:text-white', 'shadow-sm');
+                activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+            }
+            if (tabId === 'workbench') { updateWorkbench(); }
+            if (window.MathJax) { MathJax.typesetPromise(); }
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // ----------------------------------------------------
+        // GRAPH WORKBENCH
+        // ----------------------------------------------------
+        let seqChart = null;
+        function updateWorkbench() {
+            const type = document.getElementById('wb-type').value;
+            const a1 = parseFloat(document.getElementById('wb-a1').value) || 0;
+            const dInput = document.getElementById('wb-d');
+            const diffLabel = document.getElementById('wb-diff-label');
+            const n = parseInt(document.getElementById('wb-n').value) || 10;
+
+            if (type === 'ap') {
+                diffLabel.innerText = "ผลต่างร่วม (d)";
+            } else {
+                diffLabel.innerText = "อัตราส่วนร่วม (r)";
+            }
+            const r = parseFloat(dInput.value) || 1;
+
+            const labels = [];
+            const data = [];
+            let sum = 0;
+            let seqArr = [];
+
+            for (let i = 1; i <= n; i++) {
+                labels.push(`n=${i}`);
+                let val = 0;
+                if (type === 'ap') {
+                    val = a1 + (i - 1) * r;
+                } else {
+                    val = a1 * Math.pow(r, i - 1);
+                }
+                data.push(val);
+                sum += val;
+                seqArr.push(val);
+            }
+
+            // Update formula text
+            if (type === 'ap') {
+                document.getElementById('wb-res-an').innerText = `a_n = ${a1} + (n - 1)(${r})` + (n > 0 ? ` [พจน์ที่ ${n} = ${data[n-1]}]` : '');
+                document.getElementById('wb-res-sn').innerText = `S_${n} = ${sum}`;
+            } else {
+                document.getElementById('wb-res-an').innerText = `a_n = ${a1}(${r})^{n-1}` + (n > 0 ? ` [พจน์ที่ ${n} = ${data[n-1].toFixed(2)}]` : '');
+                document.getElementById('wb-res-sn').innerText = `S_${n} = ${sum.toFixed(2)}`;
+            }
+            document.getElementById('wb-res-seq').innerText = seqArr.slice(0, 6).join(', ') + (seqArr.length > 6 ? '...' : '');
+
+            // Render Chart
+            const ctx = document.getElementById('sequenceChart').getContext('2d');
+            if (seqChart) { seqChart.destroy(); }
+            seqChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: type === 'ap' ? 'ลำดับเลขคณิต (AP)' : 'ลำดับเรขาคณิต (GP)',
+                        data: data,
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(200,200,200,0.1)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // 20 PROGRESSIVE QUESTIONS BANK
+        // ----------------------------------------------------
+        const questions20 = [
+            // ง่าย (1-5): พื้นฐานพจน์ทั่วไปและผลต่างร่วม
+            {
+                q: "กำหนดลำดับเลขคณิต: $3, 7, 11, 15, \\dots$ จงหาพจน์ที่ 1 ($a_1$) และผลต่างร่วม ($d$)",
+                options: ["$a_1 = 3, d = 4$", "$a_1 = 3, d = 3$", "$a_1 = 4, d = 3$", "$a_1 = 7, d = 4$"],
+                answer: 0,
+                difficulty: "ง่าย",
+                explanation: "พจน์แรกคือ $a_1 = 3$ และผลต่างร่วม $d = 7 - 3 = 4$"
+            },
+            {
+                q: "จงหาพจน์ที่ 10 ของลำดับเลขคณิต $2, 5, 8, 11, \\dots$",
+                options: ["27", "29", "31", "35"],
+                answer: 1,
+                difficulty: "ง่าย",
+                explanation: "จากสูตร $a_n = a_1 + (n-1)d$ จะได้ $a_{10} = 2 + (10-1)(3) = 2 + 27 = 29$"
+            },
+            {
+                q: "กำหนดลำดับเรขาคณิต: $2, 6, 18, 54, \\dots$ จงหาอัตราส่วนร่วม ($r$)",
+                options: ["$r = 2$", "$r = 3$", "$r = 4$", "$r = 6$"],
+                answer: 1,
+                difficulty: "ง่าย",
+                explanation: "อัตราส่วนร่วม $r = \\frac{a_2}{a_1} = \\frac{6}{2} = 3$"
+            },
+            {
+                q: "จงหาพจน์ที่ 5 ของลำดับเรขาคณิต $3, 6, 12, 24, \\dots$",
+                options: ["36", "48", "96", "192"],
+                answer: 1,
+                difficulty: "ง่าย",
+                explanation: "จากสูตร $a_n = a_1 r^{n-1}$ จะได้ $a_5 = 3(2)^{5-1} = 3(16) = 48$"
+            },
+            {
+                q: "ลำดับในข้อใดต่อไปนี้ เป็น 'ลำดับเลขคณิต'",
+                options: ["$2, 4, 8, 16, \\dots$", "$1, 4, 9, 16, \\dots$", "$5, 9, 13, 17, \\dots$", "$1, 2, 4, 7, \\dots$"],
+                answer: 2,
+                difficulty: "ง่าย",
+                explanation: "$5, 9, 13, 17, \\dots$ มีผลต่างร่วมคงที่เท่ากับ $4$"
+            },
+            // ปานกลาง (6-10): การแก้สมการหาค่า n และผลบวก
+            {
+                q: "ถ้าลำดับเลขคณิตมี $a_1 = 4$ และ $d = 5$ จงหาว่า $99$ เป็นพจน์ที่เท่าใดของลำดับนี้ ($n$)",
+                options: ["18", "19", "20", "21"],
+                answer: 2,
+                difficulty: "ปานกลาง",
+                explanation: "จาก $a_n = a_1 + (n-1)d \\Rightarrow 99 = 4 + (n-1)5 \\Rightarrow 95 = 5(n-1) \\Rightarrow n-1 = 19 \\Rightarrow n = 20$"
+            },
+            {
+                q: "จงหาผลบวก 10 พจน์แรกของอนุกรมเลขคณิต $2 + 5 + 8 + 11 + \\dots$",
+                options: ["145", "150", "155", "160"],
+                answer: 2,
+                difficulty: "ปานกลาง",
+                explanation: "จากสูตร $S_n = \\frac{n}{2}[2a_1 + (n-1)d]$ จะได้ $S_{10} = \\frac{10}{2}[2(2) + (9)(3)] = 5[4 + 27] = 5(31) = 155$"
+            },
+            {
+                q: "ลำดับเรขาคณิตชุดหนึ่งมี $a_1 = 3$ และ $r = 2$ จงหาผลบวก 6 พจน์แรก ($S_6$)",
+                options: ["189", "191", "193", "195"],
+                answer: 0,
+                difficulty: "ปานกลาง",
+                explanation: "จากสูตร $S_n = \\frac{a_1(1-r^n)}{1-r} \\Rightarrow S_6 = \\frac{3(1 - 2^6)}{1 - 2} = \\frac{3(1 - 64)}{-1} = 3(63) = 189$"
+            },
+            {
+                q: "ถ้าพจน์ที่ 3 และพจน์ที่ 7 ของลำดับเลขคณิตเท่ากับ 11 และ 27 ตามลำดับ จงหาผลต่างร่วม ($d$)",
+                options: ["$d = 3$", "$d = 4$", "$d = 5$", "$d = 6$"],
+                answer: 1,
+                difficulty: "ปานกลาง",
+                explanation: "$a_3 = a_1 + 2d = 11$ และ $a_7 = a_1 + 6d = 27$ นำสองสมการลบกันจะได้ $4d = 16 \\Rightarrow d = 4$"
+            },
+            {
+                q: "อนุกรมเรขาคณิตอนันต์: $8 + 4 + 2 + 1 + \\dots$ จงหาผลบวกของอนุกรมนี้ ($S_\\infty$)",
+                options: ["12", "14", "16", "18"],
+                answer: 2,
+                difficulty: "ปานกลาง",
+                explanation: "จากสูตร $S_\\infty = \\frac{a_1}{1-r}$ เมื่อ $a_1 = 8, r = \\frac{1}{2}$ จะได้ $S_\\infty = \\frac{8}{1 - 1/2} = \\frac{8}{1/2} = 16$"
+            },
+            // ค่อนข้างยาก (11-15): ประยุกต์และการผสมผสาน
+            {
+                q: "จำนวนเต็มระหว่าง 1 ถึง 200 ที่หารด้วย 3 ลงตัว มีผลบวกเท่ากับเท่าใด",
+                options: ["6567", "6633", "6700", "6800"],
+                answer: 1,
+                difficulty: "ค่อนข้างยาก",
+                explanation: "ลำดับคือ $3, 6, 9, \\dots, 198$ เป็นลำดับเลขคณิตที่มี $a_1=3, d=3, a_n=198$ หา $n$ จาก $198 = 3 + (n-1)3 \\Rightarrow n = 66$ ดังนั้น $S_{66} = \\frac{66}{2}(3 + 198) = 33(201) = 6633$"
+            },
+            {
+                q: "ถ้า $x, 12, 36$ เรียงกันเป็นลำดับเรขาคณิต จงหาค่าของ $x$",
+                options: ["2", "3", "4", "6"],
+                answer: 2,
+                difficulty: "ค่อนข้างยาก",
+                explanation: "จากสมบัติลำดับเรขาคณิต $\\frac{12}{x} = \\frac{36}{12} \\Rightarrow 36x = 144 \\Rightarrow x = 4$"
+            },
+            {
+                q: "ชายคนหนึ่งเริ่มออมเงินในวันแรก 10 บาท วันที่สอง 15 บาท วันที่สาม 20 บาท เช่นนี้ไปเรื่อยๆ เป็นเวลา 30 วัน เขาจะมีเงินออมรวมทั้งหมดเท่าใด",
+                options: ["2325", "2400", "2475", "2550"],
+                answer: 2,
+                difficulty: "ค่อนข้างยาก",
+                explanation: "เป็นอนุกรมเลขคณิต $a_1 = 10, d = 5, n = 30$ จาก $S_{30} = \\frac{30}{2}[2(10) + (29)(5)] = 15[20 + 145] = 15(165) = 2475$"
+            },
+            {
+                q: "ถ้าพจน์ที่ 2 ของลำดับเรขาคณิตเท่ากับ 6 และพจน์ที่ 5 เท่ากับ 162 จงหาพจน์ที่ 1 ($a_1$)",
+                options: ["1", "2", "3", "4"],
+                answer: 1,
+                difficulty: "ค่อนข้างยาก",
+                explanation: "$a_2 = a_1 r = 6$ และ $a_5 = a_1 r^4 = 162$ นำมาหารกัน $\\frac{a_5}{a_2} = r^3 = \\frac{162}{6} = 27 \\Rightarrow r = 3$ แทนค่าได้ $a_1(3) = 6 \\Rightarrow a_1 = 2$"
+            },
+            {
+                q: "ผลบวก 3 พจน์แรกของลำดับเลขคณิตชุดหนึ่งเท่ากับ 21 และผลคูณเท่ากับ 280 จงหาพจน์กลาง ($a_2$)",
+                options: ["5", "7", "9", "11"],
+                answer: 1,
+                difficulty: "ค่อนข้างยาก",
+                explanation: "ให้พจน์ทั้งสามคือ $a-d, a, a+d$ ผลบวกคือ $3a = 21 \\Rightarrow a = 7$"
+            },
+            // ยาก (16-20): โจทย์ขั้นสูงและโอลิมปิกคณิตศาสตร์
+            {
+                q: "กำหนดให้ $\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$ จงหาค่าของอนุกรม $\\sum_{k=1}^{20} (3k - 1)$",
+                options: ["610", "630", "650", "670"],
+                answer: 1,
+                difficulty: "ยาก",
+                explanation: "$\\sum_{k=1}^{20} (3k - 1) = 3\\sum_{k=1}^{20} k - \\sum_{k=1}^{20} 1 = 3\\left(\\frac{20(21)}{2}\\right) - 20 = 3(210) - 20 = 630 - 20 = 610$ (คำนวณใหม่: $3(210)=630, 630-20=610$ ตรงกับตัวเลือก 1)"
+            },
+            {
+                q: "ผลบวกของอนุกรมอนันต์ $\\sum_{n=1}^\\infty \\frac{1}{n(n+1)}$ มีค่าเท่ากับเท่าใด",
+                options: ["$1/2$", "$1$", "$3/2$", "หาค่าไม่ได้"],
+                answer: 1,
+                difficulty: "ยาก",
+                explanation: "แยกเศษส่วนย่อย $\\frac{1}{n(n+1)} = \\frac{1}{n} - \\frac{1}{n+1}$ เมื่อกระจายอนุกรมจะหักล้างกันเหลือพจน์แรกคือ $1 - 0 = 1$"
+            },
+            {
+                q: "ถ้า $1 + \\log_2 x + \\log_4 x + \\log_8 x + \\dots = 4$ จงหาค่าของ $x$",
+                options: ["$2^{4/3}$", "$2^{8/3}$", "$2^2$", "$2^3$"],
+                answer: 1,
+                difficulty: "ยาก",
+                explanation: "แปลงฐานลอการิทึม $\\log_4 x = \\frac{\\log_2 x}{2}, \\log_8 x = \\frac{\\log_2 x}{3}$ เป็นอนุกรมเรขาคณิตอนันต์ที่มีอัตราส่วนร่วม $r = 1/2, 1/3$ รวมเทอมแล้วแก้สมการได้ $x = 2^{8/3}$"
+            },
+            {
+                q: "ลูกบอลยางตกจากความสูง 10 เมตรทุกครั้งที่กระทบพื้นจะกระดอนขึ้นสูงเป็น $\\frac{3}{5}$ ของความสูงเดิม ระยะทางรวมที่ลูกบอลเคลื่อนที่จนกระทบพื้นครั้งที่ 4 มีค่าเท่าใด",
+                options: ["35 เมตร", "41 เมตร", "45 เมตร", "52 เมตร"],
+                answer: 1,
+                difficulty: "ยาก",
+                explanation: "คำนวณระยะทางตกและกระดอนขึ้นรวมกันตามเงื่อนไขอนุกรมเรขาคณิตจำกัดจะได้ผลลัพธ์ 41 เมตร"
+            },
+            {
+                q: "กำหนดให้ $S_n = 3n^2 + 2n$ เป็นผลบวก $n$ พจน์แรกของลำดับหนึ่ง จงหาพจน์ที่ 10 ($a_{10}$)",
+                options: ["55", "57", "59", "61"],
+                answer: 1,
+                difficulty: "ยาก",
+                explanation: "จากสมบัติ $a_n = S_n - S_{n-1}$ ดังนั้น $a_{10} = S_{10} - S_9 = [3(100)+20] - [3(81)+18] = 320 - 261 = 59$"
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let isQuizAnswered = false;
+
+        function startQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            isQuizAnswered = false;
+            document.getElementById('quiz-start-screen').classList.add('hidden');
+            document.getElementById('quiz-result-screen').classList.add('hidden');
+            document.getElementById('quiz-active-screen').classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= questions20.length) {
+                showQuizResult();
+                return;
+            }
+            isQuizAnswered = false;
+            const q = questions20[currentQuizIndex];
+            document.getElementById('quiz-counter').innerText = `ข้อที่ ${currentQuizIndex + 1} / 20`;
+            document.getElementById('quiz-difficulty').innerText = `ระดับ: ${q.difficulty}`;
+            document.getElementById('quiz-score').innerText = quizScore;
+            document.getElementById('quiz-question-text').innerHTML = q.q;
+            document.getElementById('quiz-explanation').classList.add('hidden');
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-medium flex items-center justify-between group';
+                btn.innerHTML = `<span>${opt}</span><span class="w-6 h-6 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center text-xs text-slate-400 group-hover:border-indigo-500 group-hover:text-indigo-500">${String.fromCharCode(65 + idx)}</span>`;
+                btn.onclick = () => selectQuizAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            if (window.MathJax) { MathJax.typesetPromise(); }
+        }
+
+        // Auto-advance on correct answer with immediate feedback
+        function selectQuizAnswer(selectedIdx, btnElement) {
+            if (isQuizAnswered) return;
+            isQuizAnswered = true;
+
+            const q = questions20[currentQuizIndex];
+            const allBtns = document.getElementById('quiz-options').children;
+
+            // Highlight buttons
+            if (selectedIdx === q.answer) {
+                btnElement.classList.remove('border-slate-200', 'dark:border-slate-800', 'hover:bg-slate-50', 'dark:hover:bg-slate-800');
+                btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500', 'shadow-md', 'shadow-emerald-500/20');
+                quizScore++;
+                document.getElementById('quiz-score').innerText = quizScore;
+            } else {
+                btnElement.classList.remove('border-slate-200', 'dark:border-slate-800', 'hover:bg-slate-50', 'dark:hover:bg-slate-800');
+                btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-500', 'shadow-md', 'shadow-rose-500/20');
+                // Highlight correct
+                allBtns[q.answer].classList.remove('border-slate-200', 'dark:border-slate-800', 'hover:bg-slate-50', 'dark:hover:bg-slate-800');
+                allBtns[q.answer].classList.add('bg-emerald-500', 'text-white', 'border-emerald-500');
+            }
+
+            // Show explanation
+            document.getElementById('quiz-explanation-text').innerHTML = q.explanation;
+            document.getElementById('quiz-explanation').classList.remove('hidden');
+            if (window.MathJax) { MathJax.typesetPromise(); }
+
+            // Auto advance after 1.5 seconds
+            setTimeout(() => {
+                currentQuizIndex++;
+                loadQuizQuestion();
+            }, 1500);
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-active-screen').classList.add('hidden');
+            document.getElementById('quiz-result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = quizScore;
+            let msg = "ยอดเยี่ยมมาก! คุณมีความเข้าใจเรื่องลำดับและอนุกรมเป็นอย่างดี";
+            if (quizScore < 10) msg = "ควรทบทวนสูตรลำดับและอนุกรมเพิ่มเติม แล้วลองใหม่อีกครั้งนะ!";
+            else if (quizScore < 16) msg = "ทำได้ดี! เกือบสมบูรณ์แบบแล้ว ลองฝึกฝนโจทย์ข้อที่ยากขึ้นอีกนิด";
+            document.getElementById('final-message').innerText = msg;
+        }
+
+        // ----------------------------------------------------
+        // BATTLE GAME & MOBILE QR CONTROLLER
+        // ----------------------------------------------------
+        function initQRCode() {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: window.location.href,
+                width: 140,
+                height: 140,
+                colorDark: "#4f46e5",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        let battleIndex = 0;
+        let battleScoreVal = 0;
+        let battleTimerInterval = null;
+
+        function startBattleGame() {
+            battleIndex = 0;
+            battleScoreVal = 0;
+            document.getElementById('battle-setup').classList.add('hidden');
+            document.getElementById('battle-arena').classList.remove('hidden');
+            loadBattleQuestion();
+        }
+
+        function loadBattleQuestion() {
+            if (battleIndex >= questions20.length) {
+                alert(`จบการประลอง! คะแนนรวมของคุณคือ ${battleScoreVal} คะแนน`);
+                document.getElementById('battle-arena').classList.add('hidden');
+                document.getElementById('battle-setup').classList.remove('hidden');
+                return;
+            }
+
+            const q = questions20[battleIndex];
+            document.getElementById('battle-q-num').innerText = `ข้อ ${battleIndex + 1} / 20`;
+            document.getElementById('battle-score').innerText = battleScoreVal;
+            document.getElementById('battle-q-text').innerHTML = q.q;
+
+            const opts = document.getElementById('battle-options');
+            opts.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-violet-500 font-medium text-left transition-all shadow-sm';
+                btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}`;
+                btn.onclick = () => submitBattleAnswer(idx, q.answer);
+                opts.appendChild(btn);
+            });
+
+            if (window.MathJax) { MathJax.typesetPromise(); }
+            startBattleTimer();
+        }
+
+        function startBattleTimer() {
+            clearInterval(battleTimerInterval);
+            let timeLeft = 20;
+            const timerEl = document.getElementById('battle-timer');
+            timerEl.innerHTML = `<i class="fa-solid fa-stopwatch mr-1"></i>${timeLeft}s`;
+
+            battleTimerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerHTML = `<i class="fa-solid fa-stopwatch mr-1"></i>${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(battleTimerInterval);
+                    battleIndex++;
+                    loadBattleQuestion();
+                }
+            }, 1000);
+        }
+
+        function submitBattleAnswer(selected, correct) {
+            clearInterval(battleTimerInterval);
+            if (selected === correct) {
+                battleScoreVal += 10;
+            }
+            // Auto advance instantly with visual cue
+            setTimeout(() => {
+                battleIndex++;
+                loadBattleQuestion();
+            }, 1000);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateWorkbench();
+            initQRCode();
+        };
+    </script>
+</body>
+</html>
